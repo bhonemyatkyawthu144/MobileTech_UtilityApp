@@ -38,6 +38,7 @@ import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Card
+import androidx.compose.material3.Switch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +63,7 @@ fun UtilityAppPreview() {
 @Composable
 fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Utility") }
+    var showDescriptions by remember { mutableStateOf(true) }
 
     Scaffold(
         bottomBar = {
@@ -83,15 +85,22 @@ fun UtilityApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                "Utility" -> UtilityScreen()
-                "Settings" -> SettingsScreen()
+                "Utility" -> UtilityScreen(
+                    showDescriptions = showDescriptions
+                )
+                "Settings" -> SettingsScreen(
+                    showDescriptions = showDescriptions,
+                    onShowDescriptionsChange = {
+                        showDescriptions = it
+                    }
+                )
             }
         }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UtilityScreen() {
+fun UtilityScreen(showDescriptions: Boolean) {
     var selectedCategory by remember { mutableStateOf("All") }
 
     val categories = listOf(
@@ -174,9 +183,7 @@ fun UtilityScreen() {
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             NewsListItem(
                 category = "Technology",
@@ -239,13 +246,125 @@ fun NewsListItem(
 
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(showDescriptions: Boolean,
+                   onShowDescriptionsChange: (Boolean) -> Unit) {
+
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp), Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        Text("Settings Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("This is where you can add toggles or preferences.")
+        Text(
+            text = "Settings",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Appearance",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Theme",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "News",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Default category",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = true,
+                onClick = { },
+                label = { Text("All") }
+            )
+
+            FilterChip(
+                selected = false,
+                onClick = { },
+                label = { Text("Technology") }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Articles to show",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = true,
+                onClick = { },
+                label = { Text("5") }
+            )
+
+            FilterChip(
+                selected = false,
+                onClick = { },
+                label = { Text("10") }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Show descriptions",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Switch(
+                checked = showDescriptions,
+                onCheckedChange = {
+                    onShowDescriptionsChange(it)
+                }
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "About this app",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "News Utility App",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Text(
+                text = "Version 1.0",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
