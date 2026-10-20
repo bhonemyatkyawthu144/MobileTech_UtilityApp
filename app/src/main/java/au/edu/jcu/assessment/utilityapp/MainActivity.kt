@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,22 +85,32 @@ fun UtilityApp() {
 
 @Composable
 fun UtilityScreen() {
-    var counter by remember { mutableIntStateOf(0) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(16.dp)
     ) {
-        Text("Utility Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("Counter: $counter", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "NEWS",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
-        Button(onClick = { counter++ }) {
-            Text("Increment")
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Latest News",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "News articles will appear here.",
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
+
 
 @Composable
 fun SettingsScreen() {
