@@ -63,6 +63,7 @@ fun UtilityAppPreview() {
 fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Utility") }
     var showDescriptions by remember { mutableStateOf(true) }
+    var defaultCategory by remember { mutableStateOf("All") }
 
     Scaffold(
         bottomBar = {
@@ -85,12 +86,17 @@ fun UtilityApp() {
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
                 "Utility" -> UtilityScreen(
-                    showDescriptions = showDescriptions
+                    showDescriptions = showDescriptions,
+                    defaultCategory = defaultCategory
                 )
                 "Settings" -> SettingsScreen(
                     showDescriptions = showDescriptions,
                     onShowDescriptionsChange = {
                         showDescriptions = it
+                    },
+                    defaultCategory = defaultCategory,
+                    onDefaultCategoryChange = {
+                        defaultCategory = it
                     }
                 )
             }
@@ -99,8 +105,9 @@ fun UtilityApp() {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UtilityScreen(showDescriptions: Boolean) {
-    var selectedCategory by remember { mutableStateOf("All") }
+fun UtilityScreen(showDescriptions: Boolean,
+                  defaultCategory: String) {
+    var selectedCategory by remember { mutableStateOf("defaultCategory") }
 
     val categories = listOf(
         "All",
@@ -252,7 +259,9 @@ fun NewsListItem(
 @Composable
 fun SettingsScreen(
     showDescriptions: Boolean,
-    onShowDescriptionsChange: (Boolean) -> Unit
+    onShowDescriptionsChange: (Boolean) -> Unit,
+    defaultCategory: String,
+    onDefaultCategoryChange: (String) -> Unit
 ) {
 
     Column(
@@ -299,14 +308,18 @@ fun SettingsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = true,
-                onClick = { },
+                selected = defaultCategory == "All",
+                onClick = {
+                    onDefaultCategoryChange("All")
+                },
                 label = { Text("All") }
             )
 
             FilterChip(
-                selected = false,
-                onClick = { },
+                selected = defaultCategory == "Technology",
+                onClick = {
+                    onDefaultCategoryChange("Technology")
+                },
                 label = { Text("Technology") }
             )
         }
