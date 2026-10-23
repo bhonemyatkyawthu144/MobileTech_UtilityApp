@@ -36,7 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.Switch
 
@@ -188,7 +187,8 @@ fun UtilityScreen(showDescriptions: Boolean) {
             NewsListItem(
                 category = "Technology",
                 title = "New technology is changing the way we stay informed",
-                description = "Discover the latest developments and trends in technology."
+                description = "Discover the latest developments and trends in technology.",
+                showDescription = showDescriptions
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -196,7 +196,8 @@ fun UtilityScreen(showDescriptions: Boolean) {
             NewsListItem(
                 category = "World",
                 title = "Major events making headlines around the world",
-                description = "A quick look at the latest international news."
+                description = "A quick look at the latest international news.",
+                showDescription = showDescriptions
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -204,7 +205,8 @@ fun UtilityScreen(showDescriptions: Boolean) {
             NewsListItem(
                 category = "Business",
                 title = "Markets and businesses respond to today's news",
-                description = "The latest updates from the business world."
+                description = "The latest updates from the business world.",
+                showDescription = showDescriptions
             )
         }
     }
@@ -214,7 +216,8 @@ fun UtilityScreen(showDescriptions: Boolean) {
 fun NewsListItem(
     category: String,
     title: String,
-    description: String
+    description: String,
+    showDescription: Boolean
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -234,20 +237,23 @@ fun NewsListItem(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            if (showDescription) {
+                Spacer(modifier = Modifier.height(6.dp))
 
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
 
-
 @Composable
-fun SettingsScreen(showDescriptions: Boolean,
-                   onShowDescriptionsChange: (Boolean) -> Unit) {
+fun SettingsScreen(
+    showDescriptions: Boolean,
+    onShowDescriptionsChange: (Boolean) -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -347,24 +353,25 @@ fun SettingsScreen(showDescriptions: Boolean,
                     onShowDescriptionsChange(it)
                 }
             )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "About this app",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "News Utility App",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                text = "Version 1.0",
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "About this app",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "News Utility App",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = "Version 1.0",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
