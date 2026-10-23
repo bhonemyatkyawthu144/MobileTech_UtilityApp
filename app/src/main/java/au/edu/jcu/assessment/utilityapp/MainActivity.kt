@@ -38,6 +38,8 @@ import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Card
 import androidx.compose.material3.Switch
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +66,7 @@ fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Utility") }
     var showDescriptions by remember { mutableStateOf(true) }
     var defaultCategory by remember { mutableStateOf("All") }
+    var articlesToShow by remember { mutableStateOf(5) }
 
     Scaffold(
         bottomBar = {
@@ -87,7 +90,9 @@ fun UtilityApp() {
             when (selectedTab) {
                 "Utility" -> UtilityScreen(
                     showDescriptions = showDescriptions,
-                    defaultCategory = defaultCategory
+                    defaultCategory = defaultCategory,
+                    articlesToShow = articlesToShow
+
                 )
                 "Settings" -> SettingsScreen(
                     showDescriptions = showDescriptions,
@@ -97,6 +102,10 @@ fun UtilityApp() {
                     defaultCategory = defaultCategory,
                     onDefaultCategoryChange = {
                         defaultCategory = it
+                    },
+                    articlesToShow = articlesToShow,
+                    onArticlesToShowChange = {
+                        articlesToShow = it
                     }
                 )
             }
@@ -106,7 +115,8 @@ fun UtilityApp() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UtilityScreen(showDescriptions: Boolean,
-                  defaultCategory: String) {
+                  defaultCategory: String,
+                  articlesToShow: Int) {
     var selectedCategory by remember { mutableStateOf("defaultCategory") }
 
     val categories = listOf(
@@ -117,8 +127,63 @@ fun UtilityScreen(showDescriptions: Boolean,
         "Sports"
     )
 
+    val articles = listOf(
+        Triple(
+            "Technology",
+            "New technology is changing the way we stay informed",
+            "Discover the latest developments and trends in technology."
+        ),
+        Triple(
+            "World",
+            "Major events making headlines around the world",
+            "A quick look at the latest international news."
+        ),
+        Triple(
+            "Business",
+            "Markets and businesses respond to today's news",
+            "The latest updates from the business world."
+        ),
+        Triple(
+            "Technology",
+            "New devices bring smarter features to everyday life",
+            "Technology companies continue to introduce new products."
+        ),
+        Triple(
+            "World",
+            "Countries respond to important global developments",
+            "The latest updates from around the world."
+        ),
+        Triple(
+            "Business",
+            "Companies prepare for changes in the global market",
+            "Businesses are adapting to new market conditions."
+        ),
+        Triple(
+            "Technology",
+            "Artificial intelligence continues to attract attention",
+            "New AI tools are changing how people work and create."
+        ),
+        Triple(
+            "World",
+            "Global communities focus on important issues",
+            "A summary of major international developments."
+        ),
+        Triple(
+            "Business",
+            "Markets continue to react to new economic data",
+            "Investors and businesses watch the latest market movements."
+        ),
+        Triple(
+            "Technology",
+            "Mobile technology continues to evolve",
+            "New mobile technologies are creating new possibilities."
+        )
+    )
+
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         TopAppBar(
             title = {
@@ -191,30 +256,17 @@ fun UtilityScreen(showDescriptions: Boolean,
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            NewsListItem(
-                category = "Technology",
-                title = "New technology is changing the way we stay informed",
-                description = "Discover the latest developments and trends in technology.",
-                showDescription = showDescriptions
-            )
+            articles.take(articlesToShow).forEach { article ->
 
-            Spacer(modifier = Modifier.height(12.dp))
+                NewsListItem(
+                    category = article.first,
+                    title = article.second,
+                    description = article.third,
+                    showDescription = showDescriptions
+                )
 
-            NewsListItem(
-                category = "World",
-                title = "Major events making headlines around the world",
-                description = "A quick look at the latest international news.",
-                showDescription = showDescriptions
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            NewsListItem(
-                category = "Business",
-                title = "Markets and businesses respond to today's news",
-                description = "The latest updates from the business world.",
-                showDescription = showDescriptions
-            )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
     }
 }
@@ -261,7 +313,9 @@ fun SettingsScreen(
     showDescriptions: Boolean,
     onShowDescriptionsChange: (Boolean) -> Unit,
     defaultCategory: String,
-    onDefaultCategoryChange: (String) -> Unit
+    onDefaultCategoryChange: (String) -> Unit,
+    articlesToShow: Int,
+    onArticlesToShowChange: (Int) -> Unit
 ) {
 
     Column(
@@ -337,14 +391,18 @@ fun SettingsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = true,
-                onClick = { },
+                selected = articlesToShow == 5,
+                onClick = {
+                    onArticlesToShowChange(5)
+                },
                 label = { Text("5") }
             )
 
             FilterChip(
-                selected = false,
-                onClick = { },
+                selected = articlesToShow == 10,
+                onClick = {
+                    onArticlesToShowChange(10)
+                },
                 label = { Text("10") }
             )
         }
