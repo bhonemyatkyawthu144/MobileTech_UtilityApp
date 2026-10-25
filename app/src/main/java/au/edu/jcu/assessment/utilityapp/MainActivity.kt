@@ -40,6 +40,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Switch
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import au.edu.jcu.assessment.utilityapp.viewmodel.NewsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,8 +135,14 @@ fun UtilityApp() {
         defaultCategory: String,
         articlesToShow: Int
     ) {
-        var selectedCategory by remember { mutableStateOf(defaultCategory) }
 
+        val viewModel: NewsViewModel = koinViewModel()
+        val articles by viewModel.articles.collectAsState()
+        val error by viewModel.error.collectAsState()
+        var selectedCategory by remember { mutableStateOf(defaultCategory) }
+        LaunchedEffect(Unit) {
+            viewModel.loadNews()
+        }
         val categories = listOf(
             "All",
             "World",
@@ -141,7 +151,7 @@ fun UtilityApp() {
             "Sports"
         )
 
-        val articles = listOf(
+        val sampleArticles = listOf(
             Triple(
                 "Technology",
                 "New technology is changing the way we stay informed",
@@ -270,12 +280,22 @@ fun UtilityApp() {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                error?.let {
+                    Text(
+                        text = "Error: $it",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
                 articles.take(articlesToShow).forEach { article ->
 
                     NewsListItem(
-                        category = article.first,
-                        title = article.second,
-                        description = article.third,
+                        category = selectedCategory,
+                        title = article.title,
+                        description = article.description ?: "No description available.",
                         showDescription = showDescriptions
                     )
 
