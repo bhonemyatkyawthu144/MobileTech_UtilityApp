@@ -140,8 +140,16 @@ fun UtilityApp() {
         val articles by viewModel.articles.collectAsState()
         val error by viewModel.error.collectAsState()
         var selectedCategory by remember { mutableStateOf(defaultCategory) }
-        LaunchedEffect(Unit) {
-            viewModel.loadNews()
+        LaunchedEffect(selectedCategory) {
+            val apiCategory = when (selectedCategory) {
+                "World" -> "world"
+                "Business" -> "business"
+                "Technology" -> "technology"
+                "Sports" -> "sports"
+                else -> "general"
+            }
+
+            viewModel.loadNews(category = apiCategory)
         }
         val categories = listOf(
             "All",
