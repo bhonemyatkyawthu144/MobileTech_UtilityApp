@@ -1,55 +1,68 @@
-# MobileTech Utility App
+# News Utility App
 
-This is a basic Android app template for **Assessment 1: Utility App**.
-It provides the structure for a simple tabular UI using **Jetpack Compose** and **Material Design 3**.
+A simple and modern Android news utility app built with Kotlin and Jetpack Compose. The app connects to the GNews API to display real-time news and lets users customise how the news is shown.
 
----
+## Features
 
-## Getting Started
+- View the latest news from a real news API
+- Browse news by category:
+    - All
+    - World
+    - Business
+    - Technology
+    - Sports
+- Featured Story section with article images
+- Open news articles in the device browser
+- Choose how many articles to display
+- Show or hide article descriptions
+- Choose Light, Dark, or System theme
+- Loading and error states
+- Material 3 user interface
 
-### How to Run
-1. Clone or download this repo  
-2. Open in Android Studio  
-3. Run on an emulator or physical device (API 26+ recommended)  
+## Technologies
 
----
+- Kotlin
+- Jetpack Compose
+- Material 3
+- Retrofit
+- Kotlinx Serialization
+- Kotlin Coroutines
+- Koin Dependency Injection
+- Coil
+- GNews API
 
-## Composables
+## Project Structure
 
-### UtilityApp()
-- Contains the screen layout using a Scaffold
-- Toggles content between Utility and Settings
+The app follows a simple architecture using:
 
-### UtilityScreen()
-- Displays a simple counter (replace with your utility logic)  
-- Includes a button to increment the counter
+- **UI** – Jetpack Compose screens and components
+- **ViewModel** – Manages UI state and requests news data
+- **Repository** – Handles communication between the ViewModel and API
+- **Retrofit API Service** – Connects to the GNews API
+- **Koin** – Provides dependency injection
 
-### SettingsScreen()
-- Placeholder for user preferences or configuration  
-- Can be extended to modify main screen behavior (e.g., theme, units, limits)  
+## API Setup
 
----
+This project uses the GNews API.
 
-## Key Concepts Covered
+The API key is stored locally in `local.properties` and is not committed to GitHub.
 
-| Week | Concept                        | Used In                          |
-|------|--------------------------------|----------------------------------|
-| 1    | Kotlin + Android Studio         | MainActivity.kt |
-| 2    | Jetpack Compose Layouts         | UtilityApp(), UtilityScreen(), SettingsScreen()   |
-| 3    | Material Design 3               | MobileTechUtilityAppTheme, MaterialTheme.typography |
-| 4    | ViewModel | Not included in starter          |
-| 5    | Retrofit  | Not included in starter          |
+Add your API key to `local.properties`:
 
----
+```properties
+GNEWS_API_KEY=71bf5b1c21a5dc88ae985cdf83d0d4bd
+```
 
-## Suggested Extensions
-- Replace counter with a real utility (e.g., hydration tracker, timer)  
-- Add a ViewModel for state management  
-- Use SharedPreferences or DataStore to persist settings  
-- Add a simple API call using Retrofit (e.g., fetch weather or quotes)  
+Then rebuild the project in Android Studio.
 
----
+## How to Run
 
-## 📚 License
-This template is provided for educational use in CP3406.  
-Feel free to modify and extend it for your assessment.
+1. Clone or download this repository.
+2. Open the project in Android Studio.
+3. Add your GNews API key to `local.properties`.
+4. Sync the Gradle project.
+5. Run the app on an Android emulator or physical Android device.
+
+## Assignment
+
+This project was created for **CP3406/CP5307 Mobile Computing – Assignment 1: Utility App** at James Cook University Singapore.
