@@ -44,6 +44,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import au.edu.jcu.assessment.utilityapp.viewmodel.NewsViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.CircularProgressIndicator
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material3.CardDefaults
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,8 +147,11 @@ fun UtilityApp() {
         val viewModel: NewsViewModel = koinViewModel()
         val articles by viewModel.articles.collectAsState()
         val error by viewModel.error.collectAsState()
-        var selectedCategory by remember { mutableStateOf(defaultCategory) }
-        LaunchedEffect(selectedCategory) {
+        val isLoading by viewModel.isLoading.collectAsState()
+        var selectedCategory by remember(defaultCategory) {
+            mutableStateOf(defaultCategory)
+        }
+        LaunchedEffect(selectedCategory, articlesToShow) {
             val apiCategory = when (selectedCategory) {
                 "World" -> "world"
                 "Business" -> "business"
@@ -149,7 +160,10 @@ fun UtilityApp() {
                 else -> "general"
             }
 
-            viewModel.loadNews(category = apiCategory)
+            viewModel.loadNews(
+                category = apiCategory,
+                max = articlesToShow
+            )
         }
         val categories = listOf(
             "All",
@@ -157,59 +171,6 @@ fun UtilityApp() {
             "Business",
             "Technology",
             "Sports"
-        )
-
-        val sampleArticles = listOf(
-            Triple(
-                "Technology",
-                "New technology is changing the way we stay informed",
-                "Discover the latest developments and trends in technology."
-            ),
-            Triple(
-                "World",
-                "Major events making headlines around the world",
-                "A quick look at the latest international news."
-            ),
-            Triple(
-                "Business",
-                "Markets and businesses respond to today's news",
-                "The latest updates from the business world."
-            ),
-            Triple(
-                "Technology",
-                "New devices bring smarter features to everyday life",
-                "Technology companies continue to introduce new products."
-            ),
-            Triple(
-                "World",
-                "Countries respond to important global developments",
-                "The latest updates from around the world."
-            ),
-            Triple(
-                "Business",
-                "Companies prepare for changes in the global market",
-                "Businesses are adapting to new market conditions."
-            ),
-            Triple(
-                "Technology",
-                "Artificial intelligence continues to attract attention",
-                "New AI tools are changing how people work and create."
-            ),
-            Triple(
-                "World",
-                "Global communities focus on important issues",
-                "A summary of major international developments."
-            ),
-            Triple(
-                "Business",
-                "Markets continue to react to new economic data",
-                "Investors and businesses watch the latest market movements."
-            ),
-            Triple(
-                "Technology",
-                "Mobile technology continues to evolve",
-                "New mobile technologies are creating new possibilities."
-            )
         )
 
         Column(
@@ -258,17 +219,49 @@ fun UtilityApp() {
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Text(
-                            text = "Featured Story",
-                            style = MaterialTheme.typography.labelLarge
-                        )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "Latest news and important stories",
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                            articles.firstOrNull()?.let { featuredArticle ->
+                                Card(modifier = Modifier.fillMaxWidth()) {
+                                    Column {
+                                        featuredArticle.image?.let { imageUrl ->
+                                            AsyncImage(
+                                                model = imageUrl,
+                                                contentDescription = featuredArticle.title,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(220.dp),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+
+                                        Column(
+                                            modifier = Modifier.padding(16.dp)
+                                        ) {
+                                            Text(
+                                                text = "Featured Story",
+                                                style = MaterialTheme.typography.labelMedium
+                                            )
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            Text(
+                                                text = featuredArticle.title,
+                                                style = MaterialTheme.typography.titleLarge
+                                            )
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            Text(
+                                                text = featuredArticle.description
+                                                    ?: "No description available.",
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
+                                }
+                            }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -289,234 +282,301 @@ fun UtilityApp() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 error?.let {
-                    Text(
-                        text = "Error: $it",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Unable to load news",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                articles.take(articlesToShow).forEach { article ->
+                if (isLoading) {
+                    CircularProgressIndicator()
 
-                    NewsListItem(
-                        category = selectedCategory,
-                        title = article.title,
-                        description = article.description ?: "No description available.",
-                        showDescription = showDescriptions
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    articles.take(articlesToShow).forEach { article ->
+                        NewsListItem(
+                            title = article.title,
+                            description = article.description ?: "No description available.",
+                            source = article.source.name,
+                            publishedAt = article.publishedAt,
+                            image = article.image,
+                            showDescription = showDescriptions
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
+
             }
         }
     }
 
-    @Composable
-    fun NewsListItem(
-        category: String,
-        title: String,
-        description: String,
-        showDescription: Boolean
+fun formatPublishedDate(publishedAt: String): String {
+    return try {
+        val date = Instant.parse(publishedAt)
+            .atZone(ZoneId.systemDefault())
+
+        DateTimeFormatter
+            .ofPattern("dd MMM yyyy")
+            .format(date)
+    } catch (e: Exception) {
+        publishedAt
+    }
+}
+
+
+@Composable
+fun NewsListItem(
+    title: String,
+    description: String,
+    source: String,
+    publishedAt: String,
+    image: String?,
+    showDescription: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large
     ) {
-        Card(
+        Column(
             modifier = Modifier.fillMaxWidth()
         ) {
+
+            image?.let {
+                AsyncImage(
+                    model = it,
+                    contentDescription = title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                )
+            }
+
+            }
+
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(
-                    text = category,
-                    style = MaterialTheme.typography.labelMedium
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium
                 )
 
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+                    text = "$source · ${publishedAt.take(10)}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 if (showDescription) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
 
                     Text(
                         text = description,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
     }
 
-    @Composable
-    fun SettingsScreen(
-        showDescriptions: Boolean,
-        onShowDescriptionsChange: (Boolean) -> Unit,
-        defaultCategory: String,
-        onDefaultCategoryChange: (String) -> Unit,
-        articlesToShow: Int,
-        onArticlesToShowChange: (Int) -> Unit,
-        theme: String,
-        onThemeChange: (String) -> Unit
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
+        @Composable
+        fun SettingsScreen(
+            showDescriptions: Boolean,
+            onShowDescriptionsChange: (Boolean) -> Unit,
+            defaultCategory: String,
+            onDefaultCategoryChange: (String) -> Unit,
+            articlesToShow: Int,
+            onArticlesToShowChange: (Int) -> Unit,
+            theme: String,
+            onThemeChange: (String) -> Unit
         ) {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineMedium
-            )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Appearance",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Theme",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = theme == "System",
-                    onClick = {
-                        onThemeChange("System")
-                    },
-                    label = { Text("System") }
-                )
-
-                FilterChip(
-                    selected = theme == "Light",
-                    onClick = {
-                        onThemeChange("Light")
-                    },
-                    label = { Text("Light") }
-                )
-
-                FilterChip(
-                    selected = theme == "Dark",
-                    onClick = {
-                        onThemeChange("Dark")
-                    },
-                    label = { Text("Dark") }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "News",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Default category",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = defaultCategory == "All",
-                    onClick = {
-                        onDefaultCategoryChange("All")
-                    },
-                    label = { Text("All") }
-                )
-
-                FilterChip(
-                    selected = defaultCategory == "Technology",
-                    onClick = {
-                        onDefaultCategoryChange("Technology")
-                    },
-                    label = { Text("Technology") }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Articles to show",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = articlesToShow == 5,
-                    onClick = {
-                        onArticlesToShowChange(5)
-                    },
-                    label = { Text("5") }
-                )
-
-                FilterChip(
-                    selected = articlesToShow == 10,
-                    onClick = {
-                        onArticlesToShowChange(10)
-                    },
-                    label = { Text("10") }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = "Show descriptions",
+                    text = "Settings",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Appearance",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Theme",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Switch(
-                    checked = showDescriptions,
-                    onCheckedChange = {
-                        onShowDescriptionsChange(it)
-                    }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = theme == "System",
+                        onClick = {
+                            onThemeChange("System")
+                        },
+                        label = { Text("System") }
+                    )
+
+                    FilterChip(
+                        selected = theme == "Light",
+                        onClick = {
+                            onThemeChange("Light")
+                        },
+                        label = { Text("Light") }
+                    )
+
+                    FilterChip(
+                        selected = theme == "Dark",
+                        onClick = {
+                            onThemeChange("Dark")
+                        },
+                        label = { Text("Dark") }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "News",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Default category",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = defaultCategory == "All",
+                        onClick = {
+                            onDefaultCategoryChange("All")
+                        },
+                        label = { Text("All") }
+                    )
+
+                    FilterChip(
+                        selected = defaultCategory == "Technology",
+                        onClick = {
+                            onDefaultCategoryChange("Technology")
+                        },
+                        label = { Text("Technology") }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Articles to show",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = articlesToShow == 5,
+                        onClick = {
+                            onArticlesToShowChange(5)
+                        },
+                        label = { Text("5") }
+                    )
+
+                    FilterChip(
+                        selected = articlesToShow == 10,
+                        onClick = {
+                            onArticlesToShowChange(10)
+                        },
+                        label = { Text("10") }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Show descriptions",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Switch(
+                        checked = showDescriptions,
+                        onCheckedChange = {
+                            onShowDescriptionsChange(it)
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = "About this app",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "News Utility App",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Text(
+                    text = "Version 1.0",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "About this app",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "News Utility App",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                text = "Version 1.0",
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
-    }
