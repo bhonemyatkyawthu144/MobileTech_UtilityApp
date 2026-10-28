@@ -254,7 +254,7 @@ fun UtilityApp() {
                                         }
 
                                         Column(
-                                            modifier = Modifier.padding(16.dp)
+                                            modifier = Modifier.padding(12.dp)
                                         ) {
                                             Text(
                                                 text = "Featured Story",
