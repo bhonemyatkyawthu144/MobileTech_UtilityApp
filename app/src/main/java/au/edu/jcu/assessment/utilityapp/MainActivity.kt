@@ -280,12 +280,7 @@ fun UtilityApp() {
                                 }
                             }
 
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "Stay informed with the latest updates from around the world.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                     }
                 }
 
