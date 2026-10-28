@@ -416,14 +416,15 @@ fun NewsListItem(
                     contentDescription = title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp)
+                        .height(140.dp),
+                    contentScale = ContentScale.Crop
                 )
             }
 
             }
 
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(12.dp)
             ) {
 
                 Text(
@@ -432,7 +433,7 @@ fun NewsListItem(
                 )
 
                 Spacer(
-                    modifier = Modifier.height(6.dp)
+                    modifier = Modifier.height(4.dp)
                 )
 
                 Text(
@@ -443,7 +444,7 @@ fun NewsListItem(
 
                 if (showDescription) {
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier = Modifier.height(6.dp)
                     )
 
                     Text(
