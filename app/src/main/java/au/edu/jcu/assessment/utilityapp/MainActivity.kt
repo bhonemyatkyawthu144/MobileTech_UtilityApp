@@ -56,6 +56,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +150,7 @@ fun UtilityApp() {
         defaultCategory: String,
         articlesToShow: Int
     ) {
-
+        val context = LocalContext.current
         val viewModel: NewsViewModel = koinViewModel()
         val articles by viewModel.articles.collectAsState()
         val error by viewModel.error.collectAsState()
@@ -226,8 +229,18 @@ fun UtilityApp() {
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                            articles.firstOrNull()?.let { featuredArticle ->
-                                Card(modifier = Modifier.fillMaxWidth()) {
+                        articles.firstOrNull()?.let { featuredArticle ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(featuredArticle.url)
+                                        )
+                                        context.startActivity(intent)
+                                    }
+                            ) {
                                     Column {
                                         featuredArticle.image?.let { imageUrl ->
                                             AsyncImage(
@@ -316,8 +329,31 @@ fun UtilityApp() {
 
                 if (isLoading) {
                     CircularProgressIndicator()
-
                     Spacer(modifier = Modifier.height(16.dp))
+                } else if (articles.isEmpty() && error == null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No news available",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "There are no articles available for this category right now.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 } else {
                     articles.take(articlesToShow).forEach { article ->
                         NewsListItem(
@@ -329,7 +365,6 @@ fun UtilityApp() {
                             showDescription = showDescriptions,
                             url = article.url
                         )
-
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
