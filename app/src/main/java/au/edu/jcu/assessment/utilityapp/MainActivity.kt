@@ -52,6 +52,10 @@ import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.CardDefaults
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -322,7 +326,8 @@ fun UtilityApp() {
                             source = article.source.name,
                             publishedAt = article.publishedAt,
                             image = article.image,
-                            showDescription = showDescriptions
+                            showDescription = showDescriptions,
+                            url = article.url
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -354,10 +359,21 @@ fun NewsListItem(
     source: String,
     publishedAt: String,
     image: String?,
-    showDescription: Boolean
+    showDescription: Boolean,
+    url: String
 ) {
+    val context = LocalContext.current
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(url)
+                )
+                context.startActivity(intent)
+            },
         shape = MaterialTheme.shapes.large
     ) {
         Column(
