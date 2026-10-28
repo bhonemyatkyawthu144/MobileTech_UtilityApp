@@ -416,7 +416,7 @@ fun NewsListItem(
                     contentDescription = title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(140.dp)
                 )
             }
 
