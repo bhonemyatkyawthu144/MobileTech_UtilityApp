@@ -50,7 +50,7 @@ The API key is stored locally in `local.properties` and is not committed to GitH
 Add your API key to `local.properties`:
 
 ```properties
-GNEWS_API_KEY=71bf5b1c21a5dc88ae985cdf83d0d4bd
+GNEWS_API_KEY=Your API key
 ```
 
 Then rebuild the project in Android Studio.
